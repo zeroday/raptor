@@ -17,8 +17,6 @@ GH Archive is an immutable record of public GitHub activity. It's an OSS project
 
 ## Core Principles
 
-**FORENSIC INTEGRITY PROTOCOL**: GitHub Archive, accessed via BigQuery, is an immutable record of all public GitHub activity. Unlike local git repositories (which can be rewritten), GitHub Archive provides tamper-proof evidence of GitHub events as they occurred.
-
 **ALWAYS PREFER GitHub Archive as forensic evidence over**:
 - Local git command outputs (git log, git show) - commits can be backdated/forged
 - Unverified claims from articles or reports - require independent confirmation
@@ -34,15 +32,48 @@ GH Archive is an immutable record of public GitHub activity. It's an OSS project
 - **Deleted content recovery** (issues, PRs, tags, commits references remain in archive)
 - **Repository deletion forensics** (commit SHAs persist even after repo deletion and history rewrites)
 
-## GitHub Archive Infrastructure
+### What Persists After Deletion
+
+**Deleted Issues & PRs**:
+- Issue creation events (IssuesEvent) remain in archive
+- Issue comments (IssueCommentEvent) remain accessible
+- PR open/close/merge events (PullRequestEvent) persist
+- **Forensic Value**: Recover deleted evidence of social engineering, reconnaissance, or coordination
+
+**Deleted Tags & Branches**:
+- CreateEvent records for tag/branch creation persist
+- DeleteEvent records document when deletion occurred
+- **Forensic Value**: Reconstruct attack staging infrastructure (e.g., malicious payload delivery tags)
+
+**Deleted Repositories**:
+- All PushEvents to the repository remain queryable
+- Commit SHAs are permanently recorded in archive
+- Fork relationships (ForkEvent) survive deletion
+- **Forensic Value**: Access commit metadata even after threat actor deletes evidence
+
+**Deleted User Accounts**:
+- All activity events remain attributed to deleted username
+- Timeline reconstruction remains possible
+- **Limitation**: Direct code access lost, but commit SHAs can be searched elsewhere
+
+## Access GitHub Archive via BigQuery
 
 ### Access via BigQuery
 
-GitHub Archive data is available through Google Cloud BigQuery. To query it, you need:
+The entire GH Archive is also available as a public dataset on Google BigQuery: the dataset is automatically updated every hour and enables you to run arbitrary SQL-like queries over the entire dataset in seconds. To get started:
 
-1. **Google Cloud Credentials**: Service account JSON file with BigQuery access
-2. **Project Setup**: BigQuery client initialized with credentials
-3. **Free Tier**: 1 TB of data processed per month free
+1. If you don't already have a Google project...
+    a. **Login** into the Google Developer Console
+    b. **Create a project** and activate the BigQuery API
+3. [Go to BigQuery](https://console.cloud.google.com/bigquery), and select your newly created project from the dropdown in the header bar.
+Execute your first query against the public "githubarchive" dataset. You can just copy and paste the query below and run, once you've selected your project. You can also look through the public dataset itself, but you will not have permission to execute queries on behalf of the project.
+
+1. If you don't already have a Google project...
+    a. **Login** into the Google Developer Console
+    b. **Create a project** and activate the BigQuery API
+2. **Google Cloud Credentials**: create a service account with BigQuery access and download the JSON credenetials.
+
+Google provides a free tier with 1 TB of data processed per month free.
 
 **Standard Setup Pattern**:
 ```python
@@ -93,9 +124,9 @@ payload           -- JSON string with event-specific data
 
 **Payload Field**: JSON-encoded string containing event-specific details. Must be parsed with `JSON_EXTRACT_SCALAR()` or loaded with `json.loads()` in Python.
 
-## Event Types Reference
+### Event Types Reference
 
-### Repository Events
+#### Repository Events
 
 **PushEvent** - Commits pushed to a repository
 ```sql
@@ -136,7 +167,7 @@ JSON_EXTRACT_SCALAR(payload, '$.ref')        -- Name of deleted ref
 JSON_EXTRACT_SCALAR(payload, '$.forkee.full_name')  -- New fork name
 ```
 
-### Automation & CI/CD Events
+#### Automation & CI/CD Events
 
 **WorkflowRunEvent** - GitHub Actions workflow run status changes
 ```sql
@@ -154,7 +185,7 @@ JSON_EXTRACT_SCALAR(payload, '$.workflow_run.head_branch')
 **CheckRunEvent** - Check run status (CI systems)
 **CheckSuiteEvent** - Check suite for commits
 
-### Issue & Discussion Events
+#### Issue & Discussion Events
 
 **IssuesEvent** - Issue opened, closed, edited
 ```sql
@@ -170,40 +201,18 @@ JSON_EXTRACT_SCALAR(payload, '$.issue.body')
 **PullRequestReviewEvent** - PR review submitted
 **PullRequestReviewCommentEvent** - Comment on PR diff
 
-### Other Events
+#### Other Events
 
 **WatchEvent** - Repository starred
 **ReleaseEvent** - Release published
 **MemberEvent** - Collaborator added/removed
 **PublicEvent** - Repository made public
 
-## Critical Forensic Capability: Deleted Content Persistence
+#### Learn More
 
-**"GitHub Never Forgets"** - One of the most powerful forensic capabilities of GitHub Archive is that **deleted content remains queryable indefinitely**. This creates an immutable audit trail independent of repository or account deletion attempts.
-
-### What Persists After Deletion
-
-**Deleted Issues & PRs**:
-- Issue creation events (IssuesEvent) remain in archive
-- Issue comments (IssueCommentEvent) remain accessible
-- PR open/close/merge events (PullRequestEvent) persist
-- **Forensic Value**: Recover deleted evidence of social engineering, reconnaissance, or coordination
-
-**Deleted Tags & Branches**:
-- CreateEvent records for tag/branch creation persist
-- DeleteEvent records document when deletion occurred
-- **Forensic Value**: Reconstruct attack staging infrastructure (e.g., malicious payload delivery tags)
-
-**Deleted Repositories**:
-- All PushEvents to the repository remain queryable
-- Commit SHAs are permanently recorded in archive
-- Fork relationships (ForkEvent) survive deletion
-- **Forensic Value**: Access commit metadata even after threat actor deletes evidence
-
-**Deleted User Accounts**:
-- All activity events remain attributed to deleted username
-- Timeline reconstruction remains possible
-- **Limitation**: Direct code access lost, but commit SHAs can be searched elsewhere
+Detailed information in case a drill-down is needed:
+- About GH Archive https://www.gharchive.org/
+- Full schema of GitHub events https://docs.github.com/en/rest/using-the-rest-api/github-event-types
 
 ### Real-World Investigation Pattern: Deleted PR Analysis
 
@@ -1113,8 +1122,4 @@ WHERE
 GitHub Archive analysis should be your FIRST step in any GitHub-related security investigation. Start with the immutable record, then enrich with additional sources.
 
 
-## To Learn More
 
-Detailed information in case a drill-down is needed:
-- About GH Archive https://www.gharchive.org/
-- Full schema of GitHub events https://docs.github.com/en/rest/using-the-rest-api/github-event-types
