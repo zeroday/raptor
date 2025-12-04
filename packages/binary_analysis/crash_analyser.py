@@ -79,10 +79,19 @@ class CrashAnalyser:
                     analysis_depth=RaptorConfig.RADARE2_ANALYSIS_DEPTH,
                     timeout=RaptorConfig.RADARE2_TIMEOUT
                 )
-                logger.info("Radare2 wrapper initialized - enhanced binary analysis enabled")
+                logger.info("✓ Radare2 initialized - enhanced binary analysis enabled (decompilation, xrefs, etc.)")
             except Exception as e:
                 logger.warning(f"Failed to initialize radare2 wrapper: {e}")
+                logger.warning("⚠ Falling back to objdump for basic disassembly")
                 self.radare2 = None
+        elif use_radare2 and RaptorConfig.RADARE2_ENABLE:
+            # radare2 requested but not available
+            logger.warning("⚠ radare2 not found in PATH - using objdump for basic disassembly")
+            logger.info("To enable enhanced analysis (decompilation, xrefs, call graphs):")
+            logger.info("  • macOS:     brew install radare2")
+            logger.info("  • Ubuntu:    sudo apt install radare2")
+            logger.info("  • Fedora:    sudo dnf install radare2")
+            logger.info("  • Or visit:  https://github.com/radareorg/radare2")
 
         # Cache symbol information for better performance
         self._symbol_cache = self._load_symbol_table()
@@ -999,9 +1008,11 @@ class CrashAnalyser:
             result = self._get_disassembly_radare2(address, num_instructions)
             if "unavailable" not in result.lower() and "error" not in result.lower():
                 return result
-            logger.debug("Radare2 disassembly failed, falling back to objdump")
+            logger.warning("⚠ Radare2 disassembly failed, falling back to objdump")
 
         # Fallback to objdump
+        if not self.radare2:
+            logger.info("Using objdump for disassembly (install radare2 for enhanced features)")
         return self._get_disassembly_objdump(address, num_instructions)
 
     def _get_binary_info(self) -> Dict[str, str]:
