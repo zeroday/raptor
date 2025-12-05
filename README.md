@@ -43,7 +43,7 @@
 ## What is RAPTOR?
 
 RAPTOR is an **autonomous offensive/defensive security research framework**, based on
-**Claude Code**. It empowers security research with agentic workflows and automation.
+**Claude Code** and **Cursor IDE**. It empowers security research with agentic workflows and automation.
 
 RAPTOR stands for Recursive Autonomous Penetration Testing and Observation Robot.
 (We really wanted to name it RAPTOR)
@@ -76,16 +76,16 @@ without asking, check dependencies.txt first.
 ## What's unique about RAPTOR?
 
 Beyond RAPTOR's potential for autonomous security research and community collaboration, it
-demonstrates how Claude Code can be adapted for **any purpose**, with RAPTOR packages.
+demonstrates how Claude Code and Cursor IDE can be adapted for **any purpose**, with RAPTOR packages.
 
 ---
 
 ## Quick Start
 
 ```bash
-You have two options, install on your own, or deploy the devcontainer.
+You have three options: install locally, use the devcontainer, or deploy on Google Cloud.
 
-**Install**
+**Option 1: Local Install (Claude Code)**
 # 1. Install Claude Code
 # Download from: https://claude.ai/download
 
@@ -99,7 +99,22 @@ claude
 "Install semgrep"
 "Set my ANTHROPIC_API_KEY to [your-key]"
 
-**devcontainer**
+**Option 1b: Local Install (Cursor IDE)**
+# 1. Install Cursor IDE
+# Download from: https://cursor.sh
+
+# 2. Clone and open RAPTOR
+git clone https://github.com/gadievron/raptor.git
+cd raptor
+cursor .
+
+# 3. Cursor will automatically load .cursor/rules/ and AGENTS.md
+# 4. Install dependencies and configure
+python3 -m venv venv
+source venv/bin/activate  # or `venv\Scripts\activate` on Windows
+pip install -r requirements.txt
+
+**Option 2: DevContainer**
 # 4. Get the devcontainer
 A devcontainer with all prerequisites pre-installed is available. Open in VS Code or any of
 its forks with command Dev Container: Open Folder in Container, or build with docker:
@@ -111,14 +126,39 @@ Runs with --privileged flag for rr.
 The devcontainer is massive (~6GB), starting with Microsoft Python 3.12 massive devcontainer and
 adding static analysis, fuzzing and browser automation tools.
 
-# 6. Getting started with RAPTOR
+**Option 3: Google Cloud**
+# 6. Deploy on Google Cloud
+# Use Cloud Shell (free) or Compute Engine SPOT instances
+# See docs/GOOGLE_CLOUD_SETUP.md for complete guide
+
+# Quick start on Cloud Shell:
+# Open https://shell.cloud.google.com
+git clone https://github.com/gadievron/raptor.git
+cd raptor/raptor
+bash scripts/setup_gcp.sh
+
+# Or create SPOT VM:
+gcloud compute instances create raptor-vm \
+  --zone=us-central1-a \
+  --machine-type=e2-standard-4 \
+  --provisioning-model=SPOT \
+  --instance-termination-action=STOP \
+  --image-family=ubuntu-2204-lts \
+  --image-project=ubuntu-os-cloud \
+  --boot-disk-size=50GB
+
+# 7. Getting started with RAPTOR
 Just say "hi" to get started
 Try /analyze on one of our tests in /tests/data
 ```
 
-**See:** `docs/CLAUDE_CODE_USAGE.md` for complete guide
+**See:** `docs/CLAUDE_CODE_USAGE.md` for complete Claude Code guide
+**See:** `.cursor/rules/` for Cursor IDE documentation
+**See:** `AGENTS.md` for Cursor session instructions
 
-## DevContainer and Dockerfile for easy onboarding
+## Deployment Options
+
+### DevContainer and Dockerfile for easy onboarding
 
 Pre-installed security tools:
 ```
@@ -155,6 +195,24 @@ Or build it with docker:
 docker build -f .devcontainer/Dockerfile -t raptor-devcontainer:latest .
 ```
 
+### Google Cloud Platform
+
+Run RAPTOR on Google Cloud with **SPOT instances** and **GCS storage**.
+
+**Quick Start:**
+- **Cloud Shell** (free): https://shell.cloud.google.com - Perfect for quick tests
+- **Compute Engine SPOT VM**: Full capabilities
+- **Automated Setup**: `bash scripts/setup_gcp.sh` - One-command installation
+
+**Key Features:**
+- ✅ SPOT instances for flexible compute
+- ✅ GCS storage for durable storage
+- ✅ Survives interruptions: Results persist in GCS even if VM stops
+- ✅ Accessible from anywhere: Download results to Chromebook or any device
+- ✅ Automated sync: `scripts/sync_to_gcs.sh` for durable storage
+
+**See:** `docs/GOOGLE_CLOUD_SETUP.md` for complete setup guide  
+**See:** `docs/GCS_STORAGE.md` for GCS integration
 
 ---
 
@@ -172,7 +230,7 @@ docker build -f .devcontainer/Dockerfile -t raptor-devcontainer:latest .
 /web      - Web application security testing
 /agentic  - Full autonomous workflow (analysis + exploit/patch generation)
 /codeql   - CodeQL-only deep analysis with dataflow
-/analyze  - LLM analysis only (no exploit/patch generation - 50% faster & cheaper)
+/analyze  - LLM analysis only (no exploit/patch generation - 50% faster)
 ```
 
 **Exploit development & patching:**
@@ -211,6 +269,12 @@ Usage: "Use [persona name]"
 - Tier2 (9 expert personas) → Load on explicit request
 - Alpha (custom skills) → User-created
 
+**Cursor IDE Decision System:**
+- Bootstrap (AGENTS.md) → Always loaded (project root)
+- Project Rules (.cursor/rules/*.mdc) → Code patterns and architecture documentation
+- Agent workflows → Documented in .cursor/rules/agent-workflows.mdc
+- Command usage → Documented in .cursor/rules/command-usage.mdc
+
 **Python Execution Layer:**
 - raptor.py → Unified launcher
 - packages/ → 9 security capabilities
@@ -221,9 +285,11 @@ Usage: "Use [persona name]"
 - **Adversarial thinking:** Prioritizes findings by Impact × Exploitability / Detection Time
 - **Decision templates:** 5 options after each scan
 - **Progressive disclosure:** 360t → 925t → up to 2,500t with personas
-- **Dual interface:** Claude Code (interactive) or Python CLI (scripting)
+- **Dual interface:** Claude Code (interactive) or Cursor IDE (with rules) or Python CLI (scripting)
+- **Comprehensive documentation:** Full coverage of agents, commands, and workflows in .cursor/rules/
 
 **See:** `docs/ARCHITECTURE.md` for detailed technical documentation
+**See:** `.cursor/rules/` for Cursor IDE documentation
 
 ---
 
@@ -233,12 +299,12 @@ Model selection and API use is handled through Claude Code natively.
 
 (very much) Eperimental benchmark for exploit generation:
 
-| Provider             | Exploit Quality         | Cost        |
-|----------------------|-------------------------|-------------|
-| **Anthropic Claude** | ✅ Compilable C code    | ~$0.03/vuln |
-| **OpenAI GPT-4**     | ✅ Compilable C code    | ~$0.03/vuln |
-| **Gemini 2.5**       | ✅ Compilable C code    | ~$0.03/vuln |
-| **Ollama (local)**   | ❌ Often broken         | FREE        |
+| Provider             | Exploit Quality         |
+|----------------------|-------------------------|
+| **Anthropic Claude** | ✅ Compilable C code    |
+| **OpenAI GPT-4**     | ✅ Compilable C code    |
+| **Gemini 2.5**       | ✅ Compilable C code    |
+| **Ollama (local)**   | ❌ Often broken         |
 
 **Note:** Exploit generation requires frontier models (Claude, GPT, or Gemini). Local
 models work for analysis but may produce non-compilable exploit code.
@@ -261,9 +327,26 @@ python3 raptor.py fuzz --binary /path/to/binary --duration 3600
 
 ## Documentation
 
+**User Guides:**
 - **CLAUDE_CODE_USAGE.md** - Complete Claude Code usage guide
 - **PYTHON_CLI.md** - Python command-line reference
+- **AGENTS.md** - Cursor IDE session instructions (project root)
+
+**Cursor IDE Documentation:**
+- **.cursor/rules/** - Comprehensive Cursor Rules for code patterns and architecture
+  - `project-overview.mdc` - Project architecture and structure
+  - `command-usage.mdc` - All 15 commands with usage patterns
+  - `agent-workflows.mdc` - Agent orchestration patterns
+  - `crash-analysis-workflow.mdc` - Crash analysis pipeline
+  - `oss-forensics-workflow.mdc` - OSS forensics pipeline
+  - `code-style.mdc` - Python code style and conventions
+  - `code-patterns.mdc` - Common code patterns and templates
+  - Additional rules for package structure, configuration, logging, security, and LLM integration
+
+**Technical Documentation:**
 - **ARCHITECTURE.md** - Technical architecture details
+- **GOOGLE_CLOUD_SETUP.md** - Deploy RAPTOR on Google Cloud (SPOT instances)
+- **GCS_STORAGE.md** - Use Google Cloud Storage for durable storage
 - **EXTENDING_LAUNCHER.md** - How to add new capabilities
 - **FUZZING_QUICKSTART.md** - Binary fuzzing guide
 - **DEPENDENCIES.md** - External tools and licenses
@@ -280,8 +363,8 @@ RAPTOR is in alpha, and we welcome contributions from anyone, on anything.
 
 Submit pull requests.
 
-A better web exploitation module? YARA signatures generation? Maybe a port into Cursor,
-Windsurf, Copilot, or Codex? Devin? Cline? Antigravity?
+A better web exploitation module? YARA signatures generation? **Cursor IDE support is now available!** 
+See `.cursor/rules/` for comprehensive documentation. Maybe a port into Windsurf, Copilot, or Codex? Devin? Cline? Antigravity?
 
 Hacker poetry? :)
 
