@@ -15,11 +15,16 @@
 ║                Thomas Dullien (Halvar Flake) & Michael Bargury            ║ 
 ║                                                                           ║ 
 ╚═══════════════════════════════════════════════════════════════════════════╝ 
-                              __                                              
-                             / _)                                             
-                      .-^^^-/ /                                               
-                   __/       /                                                
-                  <__.|_|-|_|                                                 
+
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣀⣀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⣿⣿⠿⠿⠟
+⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⣀⣀⣀⣤⣴⣶⣶⣶⣤⣿⡿⠁⠀⠀⠀
+⣀⠤⠴⠒⠒⠛⠛⠛⠛⠛⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⣿⣿⣿⡟⠻⢿⡀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⢿⣿⠟⠀⠸⣊⡽⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⣿⡁⠀⠀⠀⠉⠁⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⠿⣿⣧⠀ Get them bugs.....⠀⠀⠀⠀⠀⠀⠀⠀
+                                                 
 ```
 
 # RAPTOR - Autonomous Offensive/Defensive Security Research Framework, based on Claude Code
@@ -57,23 +62,30 @@ RAPTOR combines traditional security tools with agentic automation and analysis
 understands your code, proves exploitability, and proposes patches.
 
 **Disclaimer: It's a quick hack, and we can't live without it**:
-No matter the result we got to (and some of our tools are beyond useful), RAPTOR itself was
-hacked together in free time, held together by vibe coding and duct tape. We encourage community
-contributions. it's open source, modular, and extensible.
+We're proud of RAPTOR (and some of our tools are beyond useful), but RAPTOR itself was hacked
+together in free time, held together by vibe coding and duct tape. Consider it an early release.
 
-**Be warned**: RAPTOR will automatically install tools without asking, check dependencies.txt
-first, and install dependencies. Or, contribute a Docker image so it's easier for others.
+What will make RAPTOR truly transformative is community contributions. It's open source,
+modular, and extensible.
+
+**Be warned**: Unless you use the devcontainer, RAPTOR will automatically install tools
+without asking, check dependencies.txt first.
 
 ---
 
 ## What's unique about RAPTOR?
+
 Beyond RAPTOR's potential for autonomous security research and community collaboration, it
-demonstrates how Claude Code can be adapted for any purpose**, with RAPTOR packages.
+demonstrates how Claude Code can be adapted for **any purpose**, with RAPTOR packages.
+
 ---
 
 ## Quick Start
 
 ```bash
+You have two options, install on your own, or deploy the devcontainer.
+
+**Install**
 # 1. Install Claude Code
 # Download from: https://claude.ai/download
 
@@ -82,17 +94,67 @@ git clone https://github.com/gadievron/raptor.git
 cd raptor
 claude
 
-# 3. Let Claude install dependencies
+# 3. Let Claude install dependencies, and check licenses for the various tools
 "Install dependencies from requirements.txt"
 "Install semgrep"
 "Set my ANTHROPIC_API_KEY to [your-key]"
 
-# 4. Start RAPTOR
+**devcontainer**
+# 4. Get the devcontainer
+A devcontainer with all prerequisites pre-installed is available. Open in VS Code or any of
+its forks with command Dev Container: Open Folder in Container, or build with docker:
+docker build -f .devcontainer/Dockerfile -t raptor-devcontainer:latest ..
+
+Runs with --privileged flag for rr.
+
+# 5. Notes
+The devcontainer is massive (~6GB), starting with Microsoft Python 3.12 massive devcontainer and
+adding static analysis, fuzzing and browser automation tools.
+
+# 6. Getting started with RAPTOR
 Just say "hi" to get started
-Try /analyze on one of our tests /tests/data
+Try /analyze on one of our tests in /tests/data
 ```
 
 **See:** `docs/CLAUDE_CODE_USAGE.md` for complete guide
+
+## DevContainer and Dockerfile for easy onboarding
+
+Pre-installed security tools:
+```
+Semgrep (static analysis)
+CodeQL CLI v2.15.5 (semantic code analysis)
+AFL++ (fuzzing)
+rr debugger (deterministic record-replay debugging)
+```
+
+Build & debugging tools:
+```
+gcc, g++, clang-format, make, cmake, autotools
+gdb, gdb-multiarch, binutils
+```
+
+Web testing:
+```
+Playwright browser automation (Chromium, Firefox, Webkit browsers)
+```
+
+Runtime notes:
+```
+Runs with --privileged flag required for rr debugger
+PYTHONPATH configured for /workspaces/raptor imports
+All Playwright browsers pre-downloaded
+```
+### Usage
+
+Open in VS Code or any of its forks with Dev Container: Open Folder in Container command.
+
+Or build it with docker:
+
+```
+docker build -f .devcontainer/Dockerfile -t raptor-devcontainer:latest .
+```
+
 
 ---
 
@@ -235,6 +297,8 @@ https://join.slack.com/t/promptgtfo/shared_invite/zt-3alf92eqe-BpVLxPbWTI50Tbl11
 MIT License - Copyright (c) 2025 Gadi Evron, Daniel Cuthbert, Thomas Dullien (Halvar Flake), and Michael Bargury
 
 See LICENSE file for full text.
+
+Make sure and review the licenses for the various tools. For example, CodeQL does not allow commercial use.
 
 ---
 

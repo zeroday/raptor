@@ -11,4 +11,6 @@ __pycache__/
 out/
 .out/
 
+# Local
 .env*
+.claude/*.local.json

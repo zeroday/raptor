@@ -14,6 +14,12 @@
 ## External Tools (User Installs)
 
 RAPTOR **requires users to install** these external tools. RAPTOR does not bundle them.
+You can use the devcontainer if you'd like to get these bundled.
+
+**Warning**: Without bundling, RAPTOR auto-downloads tools as needed.
+
+**Note on licensing**: Be sure to examine licenses for these tools prior to using them.
+For example CodeQL does not allow commerical use.
 
 ### Required Tools
 
@@ -107,6 +113,9 @@ RAPTOR **requires users to install** these external tools. RAPTOR does not bundl
 - System tools (GPL v3, Apache 2.0) - Pre-installed on OS
 
 **Important:** RAPTOR does not bundle external tools. Users install them separately according to each tool's license terms.
+You can use the devcontainer if you'd like to get these bundled.
+
+**Warning**: Without bundling, RAPTOR auto-downloads tools as needed.
 
 ---
 
@@ -116,5 +125,7 @@ RAPTOR **requires users to install** these external tools. RAPTOR does not bundl
 - Review Semgrep license (LGPL 2.1) for your use case
 - Review CodeQL terms (free for security research, restrictions apply)
 - GPL tools (GDB, binutils) are used as command-line tools, not linked libraries
+
+You should review all respective tool licenses on your own, the above is merely informational.
 
 **RAPTOR's MIT license applies only to RAPTOR's code**, not to external tools users install.
