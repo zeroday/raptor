@@ -1,0 +1,51 @@
+{
+  "version": "5.0.0",
+  "level": 2,
+  "categories": {
+    "V1": {
+      "name": "Architecture",
+      "requirements": [
+        {
+          "id": "V1.1.1",
+          "description": "Verify that all application components are identified and documented.",
+          "level": 1,
+          "category": "V1"
+        }
+      ]
+    },
+    "V2": {
+      "name": "Authentication",
+      "requirements": [
+        {
+          "id": "V2.1.1",
+          "description": "Verify that all authentication controls are enforced on the server side.",
+          "level": 1,
+          "category": "V2"
+        },
+        {
+          "id": "V2.1.2",
+          "description": "Verify that all authentication failures are logged.",
+          "level": 2,
+          "category": "V2"
+        }
+      ]
+    },
+    "V5": {
+      "name": "Data Validation",
+      "requirements": [
+        {
+          "id": "V5.1.1",
+          "description": "Verify that all input validation is enforced on the server side.",
+          "level": 1,
+          "category": "V5"
+        },
+        {
+          "id": "V5.2.1",
+          "description": "Verify that output encoding is enforced on the server side.",
+          "level": 1,
+          "category": "V5"
+        }
+      ]
+    }
+  }
+}
