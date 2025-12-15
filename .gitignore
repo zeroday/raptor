@@ -16,4 +16,4 @@ out/
 .claude/*.local.json
 
 # Runtime artifacts
-codeql_dbs/
+codeql_dbs/venv/
